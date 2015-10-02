@@ -1,4 +1,4 @@
 function main
-  echo "run my task!"
-  echo "next task!"
+echo "run my task!"
+echo "yo yo"
 end
