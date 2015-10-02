@@ -1,0 +1,34 @@
+#!/usr/local/bin/fish
+
+set -x test_json '{"repository":{"name":"rails_sample"}}'
+
+
+### Global variables
+set -x project_dir ./projects
+
+echo "zoku started"
+
+function build
+	set json         $argv[-1]
+	set repo_name    (echo $json | jq -r '.repository.name')
+	set action_file  $project_dir/$repo_name/action
+	set action       (cat  $action_file | tr '\n' ';')
+
+	if test $action
+		echo "Buidling $repo_name started..."
+		docker run -e "action=$action" builder fish -c 'eval $action; main'
+		echo "Buidling $repo_name finished!!"
+	else
+		echo "$action_file doesn't exist"
+	end
+
+end
+
+while true
+	sleep 3
+	#set github_webhook_json (echo -e 'HTTP/1.1 200 OK\r\n' | nc -l 4567)
+	set github_webhook_json $test_json
+	build $github_webhook_json
+end
+
+
