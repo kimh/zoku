@@ -45,8 +45,6 @@ function next_build_dir
 	end
 
 	echo (math $newest_build_num + 1)
-
-	echo (math $newest_build_num + 1)
 end
 
 #while true
