@@ -1,8 +1,0 @@
-function main
-  echo "run my task!"
-  echo "yo yo"
-
-  if true
-    echo "it's true"
-  end
-end
