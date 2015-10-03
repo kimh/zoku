@@ -35,7 +35,7 @@ function build
 		mkdir -p $build_dir
 	
 		pushd $build_dir
-		docker run -e "action=$action" builder fish -c 'eval $action; main'
+		docker run -e "action=$action" builder fish -c 'eval $action; main' > out.log
 		echo "Buidling $repo_name finished!!"
 		popd
 	else
