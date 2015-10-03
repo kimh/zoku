@@ -1,34 +1,70 @@
 #!/usr/local/bin/fish
 
 set -x test_json '{"repository":{"name":"rails_sample"}}'
+set -x action_file '/Users/kimh/git/zoku/data/rails_sample/action'
 
+### Utils
+function is_dir_empty
+	set dentry (ls -A $argv)
+
+	if test -z "$dentry"
+		return 0
+	else
+		return 1
+	end
+end
 
 ### Global variables
-set -x project_dir ./projects
+set -x data_dir ./data
 
 echo "zoku started"
 
 function build
 	set json         $argv[-1]
 	set repo_name    (echo $json | jq -r '.repository.name')
-	set action_file  $project_dir/$repo_name/action
-	set action       (cat  $action_file | tr '\n' ';')
 
+	set project_dir  $data_dir/$repo_name
+	set builds_dir   $project_dir/builds
+	set build_num    (next_build_dir $builds_dir)
+	set build_dir    $builds_dir/$build_num
+	
+	set action       (cat  $action_file | tr '\n' ';')
+	
 	if test $action
 		echo "Buidling $repo_name started..."
+		mkdir -p $build_dir
+	
+		pushd $build_dir
 		docker run -e "action=$action" builder fish -c 'eval $action; main'
 		echo "Buidling $repo_name finished!!"
+		popd
 	else
 		echo "$action_file doesn't exist"
 	end
 
 end
 
-while true
-	sleep 3
+function next_build_dir
+	set builds_dir $argv[1]
+
+	if is_dir_empty $builds_dir
+		set newest_build_num 0
+	else
+		set newest_build_num (ls $builds_dir)[-1]
+	end
+
+	echo (math $newest_build_num + 1)
+
+	echo (math $newest_build_num + 1)
+end
+
+#while true
+	#sleep 3
 	#set github_webhook_json (echo -e 'HTTP/1.1 200 OK\r\n' | nc -l 4567)
 	set github_webhook_json $test_json
-	build $github_webhook_json
-end
+	set logfile 
+
+	build $github_webhook_json 
+#end
 
 
