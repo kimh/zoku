@@ -19,28 +19,30 @@ function build
 	set build_dir    $builds_dir/$build_num
 
 	echo "Buidling $repo_name started..."
-	mkdir -p $build_dir;
-	pushd $build_dir
 
-	docker run -e "clone_url=https://github.com/kimh/fish-functions.git" builder fish -c '
-	# Need to join the protocol and repo url because fish automatically coverted colon-delimitted string into array.;
-        # See: https://github.com/fish-shell/fish-shell/issues/1374;
-	set clone_url "$clone_url[1]:$clone_url[2]";
-	git clone $clone_url; and cd fish-functions;
-	. zoku.fish;
-	main;
-	' > out.log
+	pushd $build_dir; run_build; set result $status; popd
 
-	set exit_status $status
-
-	if test $status -ne 0
-		echo "Test failed with exit status: $exit_status"
+	if test $result -ne 0
+		echo "Test failed with exit status: $result"
 	else
 		echo "Test passed"
 	end
 
 	echo "Buidling $repo_name finished!!"
-	popd
+end
+
+function run_build
+	docker run -e \
+	       "clone_url=https://github.com/kimh/fish-functions.git" \
+               builder fish -c ' \
+	       # Need to join the protocol and repo url because fish automatically \
+	       # coverted colon-delimitted string into array. \
+	       # See: https://github.com/fish-shell/fish-shell/issues/1374 \
+               set clone_url "$clone_url[1]:$clone_url[2]";
+               git clone $clone_url; and cd fish-functions;
+ 	       . zoku.fish;
+	       main;
+	       ' > out.log
 end
 
 function next_build_dir
