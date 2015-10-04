@@ -1,6 +1,6 @@
 #!/usr/local/bin/fish
 
-source utils.fish
+source ~/git/fish-functions/src/utils.fish
 
 set -x test_json '{"repository":{"name":"rails_sample"}}'
 set -x action_file '/Users/kimh/git/zoku/data/rails_sample/action'
