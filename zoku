@@ -1,20 +1,13 @@
 #!/usr/local/bin/fish
-
-source utils.fish
+source lib/utils.fish
 source lib/zoku.fish
 
 set -x test_json '{"repository":{"name":"zoku","clone_url":"https://github.com/kimh/zoku.git"}}'
-
-
-
-echo "zoku started"
-
 
 #while true
 #	sleep 3
 	#set github_webhook_json (echo -e 'HTTP/1.1 200 OK\r\n' | nc -l 4567)
 	set github_webhook_json $test_json
-	set logfile 
 
 	build $github_webhook_json 
 #end

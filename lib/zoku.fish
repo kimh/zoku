@@ -1,7 +1,7 @@
 ### Global variables
 set -x data_dir ./data
 
-function build
+function buil
 	set json         $argv[-1]
 	set repo_name    (echo $json | jq -r '.repository.name')
 	set clone_url    (echo $json | jq -r '.repository.clone_url')
