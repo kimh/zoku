@@ -1,8 +1,8 @@
 #!/usr/local/bin/fish
 
-source ~/git/fish-functions/src/utils.fish
+source utils.fish
 
-set -x test_json '{"repository":{"name":"fish-functions","clone_url":"https://github.com/kimh/fish-functions.git"}}'
+set -x test_json '{"repository":{"name":"zoku","clone_url":"https://github.com/kimh/zoku.git"}}'
 
 ### Global variables
 set -x data_dir ./data
@@ -16,7 +16,7 @@ function build
 	set project_dir  $data_dir/$repo_name
 	set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
 	set build_num    (next_build_dir $builds_dir)
-	set build_dir    $builds_dir/$build_num
+	set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
 
 	echo "Buidling $repo_name started..."
 
@@ -33,7 +33,7 @@ end
 
 function run_build
 	docker run -e \
-	       "clone_url=https://github.com/kimh/fish-functions.git" \
+	       "clone_url=https://github.com/kimh/zoku.git" \
                builder fish -c ' \
 	       # Need to join the protocol and repo url because fish automatically \
 	       # coverted colon-delimitted string into array. \
