@@ -1,5 +1,6 @@
 set -x sandbox "/tmp/zoku_sandbox"
 
+ls -la
 source utils.fish
 
 function test_fail

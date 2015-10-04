@@ -40,10 +40,11 @@ function run_build
 	       # coverted colon-delimitted string into array. \
 	       # See: https://github.com/fish-shell/fish-shell/issues/1374 \
                set clone_url "$clone_url[1]:$clone_url[2]";
-               git clone $clone_url; and cd $zoku;
-	       ls \
- 	       . zoku.fish;
-	       main;
+               git clone $clone_url;
+	       and cd zoku;
+
+ 	       . zoku.fish
+	       and main;
 	       ' > out.log
 end
 
