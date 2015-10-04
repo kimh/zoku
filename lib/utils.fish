@@ -18,8 +18,10 @@ function error_msg
 	set_color red; echo $argv
 end
 
-
-
 function info_msg
+	set_color green; echo $argv
+end
+
+function warn_msg
 	set_color green; echo $argv
 end

@@ -39,7 +39,7 @@ function run_build
 	       ' > out.log
 end
 
-function next_build_dir
+func tion next_build_dir
 	set builds_dir $argv[1]
 
 	if is_dir_empty $builds_dir
