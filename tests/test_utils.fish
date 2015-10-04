@@ -1,6 +1,6 @@
 set -x sandbox "/tmp/zoku_sandbox"
 
-source utils.fish
+source lib/utils.fish
 
 function test_fail
 	echo "Test fail: $argv"
