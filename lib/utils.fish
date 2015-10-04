@@ -9,3 +9,17 @@ function is_dir_empty
 		return 1
 	end
 end
+
+function msg
+	set_color normal; echo $argv
+end
+
+function error_msg
+	set_color red; echo $argv
+end
+
+
+
+function info_msg
+	set_color green; echo $argv
+end

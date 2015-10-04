@@ -12,17 +12,17 @@ function build
 	set build_num    (next_build_dir $builds_dir)
 	set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
 
-	echo "Buidling $repo_name: #$build_num started..."
+	msg "Buidling $repo_name: #$build_num started..."
 
 	pushd $build_dir; run_build $repo_name $clone_url; set result $status; popd
 
 	if test $result -ne 0
-		echo "Test failed with exit status: $result"
+		error_msg "Test failed with exit status: $result"
 	else
-		echo "Test passed"
+		info_msg "Test passed"
 	end
 
-	echo "Buidling $repo_name finished!!"
+	msg "Buidling $repo_name finished!!"
 end
 
 function run_build

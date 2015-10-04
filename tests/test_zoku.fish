@@ -32,7 +32,7 @@ function test_next_build_dir
 		prepare; and mkdir $sandbox/1
 		set build_num (next_build_dir $sandbox)
 
-		if test $build_num -ne 
+		if test $build_num -ne 2
 		   test_fail $t
 		end
 	end
