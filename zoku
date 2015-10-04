@@ -34,12 +34,13 @@ end
 function run_build
 	docker run -e \
 	       "clone_url=https://github.com/kimh/zoku.git" \
+	       "repo_name=$repo_name" \
                builder fish -c ' \
 	       # Need to join the protocol and repo url because fish automatically \
 	       # coverted colon-delimitted string into array. \
 	       # See: https://github.com/fish-shell/fish-shell/issues/1374 \
                set clone_url "$clone_url[1]:$clone_url[2]";
-               git clone $clone_url; and cd fish-functions;
+               git clone $clone_url; and cd $repo_name;
  	       . zoku.fish;
 	       main;
 	       ' > out.log
