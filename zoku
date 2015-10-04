@@ -1,5 +1,4 @@
 #!/usr/local/bin/fish
-source lib/utils.fish
 source lib/zoku.fish
 
 set -x test_json '{"repository":{"name":"zoku","clone_url":"https://github.com/kimh/zoku.git"}}'

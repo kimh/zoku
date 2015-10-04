@@ -1,3 +1,5 @@
+source lib/utils.fish
+
 ### Global variables
 set -x data_dir ./data
 
