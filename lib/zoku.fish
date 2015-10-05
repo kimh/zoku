@@ -28,6 +28,7 @@ end
 function run_build
 	set repo_name $argv[1]
 	set clone_url $argv[2]
+	
 	docker run  \
 	       -e "clone_url=$clone_url" \
 	       -e "repo_name=$repo_name" \
