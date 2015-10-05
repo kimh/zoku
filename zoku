@@ -1,14 +1,45 @@
 #!/usr/local/bin/fish
 source lib/zoku.fish
+source vendor/getopts.fish
 
 set -x test_json '{"repository":{"name":"zoku","clone_url":"https://github.com/kimh/zoku.git"}}'
+set sub_commands "build" "help"
+set sub_command $argv[1]
+
+function print_help
+	echo "Subcommands: [$sub_commands]"
+end
+
+if not contains $sub_command $sub_commands
+	print_help
+	exit 1
+end
+
+switch $sub_command
+	case build
+		set $argv $argv[2..-1]
+		set github_webhook_json $test_json
+
+		while set optarg (getopts "r:repo: i:image: o:optional:^" $argv[2..-1])
+		      switch $optarg[1]
+			      case r
+				      set vcs_url $optarg[2]
+		              case i
+				      set image $optarg[2]
+			      case \*
+				      echo unknown option `$optarg[1]`
+		      end
+		end
+
+		build $vcs_url $image
+	case *
+		print_help
+end
 
 #while true
 #	sleep 3
 	#set github_webhook_json (echo -e 'HTTP/1.1 200 OK\r\n' | nc -l 4567)
-	set github_webhook_json $test_json
-
-	build $github_webhook_json 
+	#set github_webhook_json $test_json
+	#build $github_webhook_json
 #end
-
 

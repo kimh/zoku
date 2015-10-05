@@ -4,9 +4,14 @@ source lib/utils.fish
 set -x data_dir ./data
 
 function build
-	set json         $argv[-1]
-	set repo_name    (echo $json | jq -r '.repository.name')
-	set clone_url    (echo $json | jq -r '.repository.clone_url')
+	#set repo         $argv[1]
+	#set json         $argv[-1]
+	#set repo_name    (echo $json | jq -r '.repository.name')
+	#set clone_url    (echo $json | jq -r '.repository.clone_url')
+	set clone_url    $argv[1]
+	set image        $argv[2]
+	set parsed_url   (echo $clone_url | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
+	set repo_name    $parsed_url[-1]
 	set project_dir  $data_dir/$repo_name
 	set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
 	set build_num    (next_build_dir $builds_dir)
@@ -14,7 +19,7 @@ function build
 
 	msg "Buidling $repo_name: #$build_num started..."
 
-	pushd $build_dir; run_build $repo_name $clone_url; set result $status; popd
+	pushd $build_dir; run_build $repo_name $clone_url $image; set result $status; popd
 
 	if test $result -ne 0
 		error_msg "Test failed with exit status: $result"
@@ -28,11 +33,12 @@ end
 function run_build
 	set repo_name $argv[1]
 	set clone_url $argv[2]
+	set image     $argv[3]
 	
 	docker run  \
 	       -e "clone_url=$clone_url" \
 	       -e "repo_name=$repo_name" \
-               builder fish -c ' \
+               $image fish -c ' \
                git clone $clone_url
 	       and cd $repo_name
 	       and source zoku.fish

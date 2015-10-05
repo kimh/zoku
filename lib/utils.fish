@@ -10,6 +10,11 @@ function is_dir_empty
 	end
 end
 
+# https://github.com/fish-shell/fish-shell/issues/2459
+function to_list
+  xargs printf "%s\n"
+end
+
 function msg
 	set_color normal; echo $argv
 end
