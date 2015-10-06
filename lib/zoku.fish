@@ -6,39 +6,38 @@ set -x data_dir ./data
 function build
 	set repo_path    $argv[1]
 	set image        $argv[2]
-
-	if str_contains "http" $repo_path
-		set parsed_url   (echo $repo_path | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
-		set repo_name    $parsed_url[-1]
-		set project_dir  $data_dir/$repo_name
-		set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
-		set build_num    (next_build_dir $builds_dir)
-		set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
-		msg "Buidling $repo_name: #$build_num started..."
-
-		pushd $build_dir; run_build $repo_name $repo_path $image; set result $status; popd
+	
+	if is_remote_repo $repo_path
+		set repo_name    (echo $repo_path | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)[-1]
 	else
 		set repo_path (absolute_path $repo_path)
 		set repo_name (echo $repo_path | tr "/" " " | to_list)[-1]
-		set project_dir  $data_dir/$repo_name
-		set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
-		set build_num    (next_build_dir $builds_dir)
-		set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
-		msg "Buidling $repo_name: #$build_num started..."
-
-		pushd $build_dir; run_build_from_local $repo_name $repo_path $image; set result $status; popd
 	end
 
-	if test $result -ne 0
-		error_msg "Test failed with exit status: $result"
+	set project_dir  $data_dir/$repo_name
+	set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
+	set build_num    (next_build_dir $builds_dir)
+	set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
+
+	msg "Buidling $repo_name: #$build_num started..."
+	
+	if is_remote_repo $repo_path
+		pushd $build_dir; build_from_remote $repo_name $repo_path $image; set result $status; popd
 	else
+		pushd $build_dir; build_from_local  $repo_name $repo_path $image; set result $status; popd
+	end
+
+	if test $result -eq 0
 		info_msg "Test passed"
+
+	else
+		error_msg "Test failed with exit status: $result"
 	end
 
 	msg "Buidling $repo_name finished!!"
 end
 
-function run_build_from_local
+function build_from_local
 	set repo_name    $argv[1]
 	set repo_path    $argv[2]
 	set image        $argv[3]
@@ -53,7 +52,7 @@ function run_build_from_local
 	'
 end
 
-function run_build
+function build_from_remote
 	set repo_name $argv[1]
 	set clone_url $argv[2]
 	set image     $argv[3]
@@ -67,6 +66,10 @@ function run_build
 	and source zoku.fish
 	and main;
 	'
+end
+
+function is_remote_repo
+	return (str_contains "http" $argv[1])
 end
 
 function next_build_dir
