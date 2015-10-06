@@ -19,8 +19,17 @@ function build
 
 	msg "Buidling $repo_name: #$build_num started..."
 
-	pushd $build_dir; run_build $repo_name $clone_url $image; set result $status; popd
 
+	if str_contains "http" $clone_url
+		set par   (echo $clone_url | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
+		set repo_name    $parsed_url[-1]
+		pushd $build_dir; run_build $repo_name $clone_url $image; set result $status; popd
+	else
+		set repo_path (absolute_path $clone_url)
+		set repo_name (echo $repo_path | tr "/" " " | to_list)[-1]
+		pushd $build_dir; run_build_from_local $repo_name $repo_path $image; set result $status; popd
+	end
+	
 	if test $result -ne 0
 		error_msg "Test failed with exit status: $result"
 	else
@@ -30,20 +39,50 @@ function build
 	msg "Buidling $repo_name finished!!"
 end
 
+function run_build_from_local
+	set repo_name    $argv[1]
+	set repo_path    $argv[2]
+	set image        $argv[3]
+
+	docker run  \
+	-v $repo_path:/$repo_name \
+	-e "repo_name=$repo_name" \
+        $image fish -c ' \
+        cd $repo_name; ls ; source zoku.fish
+	#and main;
+	'
+end
+
 function run_build
 	set repo_name $argv[1]
 	set clone_url $argv[2]
 	set image     $argv[3]
-	
+
+	if str_contains "http" $clone_url
 	docker run  \
-	       -e "clone_url=$clone_url" \
-	       -e "repo_name=$repo_name" \
-               $image fish -c ' \
-               git clone $clone_url
-	       and cd $repo_name
-	       and source zoku.fish
-	       and main;
-	       ' > out.log
+	-e "clone_url=$clone_url" \
+	-e "repo_name=$repo_name" \
+        $image fish -c ' \
+        git clone $clone_url
+	and cd $repo_name
+	and source zoku.fish
+	and main;
+	' > out.log
+
+        else
+		set volume_path (absolute_path $clone_url)
+		echo "here"
+		echo (pwd)
+		echo  (absolute_path $clone_url)
+	docker run  \
+	-v $volume_path:/zoku \
+	-e "repo_name=$repo_name" \
+        $image fish -c ' \
+	and cd $repo_name
+	and source zoku.fish
+	and main;
+	' > out.log
+	end
 end
 
 function next_build_dir
