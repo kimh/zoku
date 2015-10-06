@@ -4,32 +4,31 @@ source lib/utils.fish
 set -x data_dir ./data
 
 function build
-	#set repo         $argv[1]
-	#set json         $argv[-1]
-	#set repo_name    (echo $json | jq -r '.repository.name')
-	#set clone_url    (echo $json | jq -r '.repository.clone_url')
-	set clone_url    $argv[1]
+	set repo_path    $argv[1]
 	set image        $argv[2]
-	set parsed_url   (echo $clone_url | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
-	set repo_name    $parsed_url[-1]
-	set project_dir  $data_dir/$repo_name
-	set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
-	set build_num    (next_build_dir $builds_dir)
-	set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
 
-	msg "Buidling $repo_name: #$build_num started..."
-
-
-	if str_contains "http" $clone_url
-		set par   (echo $clone_url | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
+	if str_contains "http" $repo_path
+		set parsed_url   (echo $repo_path | sed 's|https://\(.*\)/\(.*\)/\(.*\).git|\1 \2 \3|' | to_list)
 		set repo_name    $parsed_url[-1]
-		pushd $build_dir; run_build $repo_name $clone_url $image; set result $status; popd
+		set project_dir  $data_dir/$repo_name
+		set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
+		set build_num    (next_build_dir $builds_dir)
+		set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
+		msg "Buidling $repo_name: #$build_num started..."
+
+		pushd $build_dir; run_build $repo_name $repo_path $image; set result $status; popd
 	else
-		set repo_path (absolute_path $clone_url)
+		set repo_path (absolute_path $repo_path)
 		set repo_name (echo $repo_path | tr "/" " " | to_list)[-1]
+		set project_dir  $data_dir/$repo_name
+		set builds_dir   $project_dir/builds; and mkdir -p $builds_dir
+		set build_num    (next_build_dir $builds_dir)
+		set build_dir    $builds_dir/$build_num; and mkdir -p $build_dir
+		msg "Buidling $repo_name: #$build_num started..."
+
 		pushd $build_dir; run_build_from_local $repo_name $repo_path $image; set result $status; popd
 	end
-	
+
 	if test $result -ne 0
 		error_msg "Test failed with exit status: $result"
 	else
@@ -48,8 +47,9 @@ function run_build_from_local
 	-v $repo_path:/$repo_name \
 	-e "repo_name=$repo_name" \
         $image fish -c ' \
-        cd $repo_name; ls ; source zoku.fish
-	#and main;
+ 	and cd $repo_name
+	and source zoku.fish
+	and main;
 	'
 end
 
@@ -58,7 +58,6 @@ function run_build
 	set clone_url $argv[2]
 	set image     $argv[3]
 
-	if str_contains "http" $clone_url
 	docker run  \
 	-e "clone_url=$clone_url" \
 	-e "repo_name=$repo_name" \
@@ -67,22 +66,7 @@ function run_build
 	and cd $repo_name
 	and source zoku.fish
 	and main;
-	' > out.log
-
-        else
-		set volume_path (absolute_path $clone_url)
-		echo "here"
-		echo (pwd)
-		echo  (absolute_path $clone_url)
-	docker run  \
-	-v $volume_path:/zoku \
-	-e "repo_name=$repo_name" \
-        $image fish -c ' \
-	and cd $repo_name
-	and source zoku.fish
-	and main;
-	' > out.log
-	end
+	'
 end
 
 function next_build_dir
